@@ -20,32 +20,24 @@ public class Client {
         } catch (IOException u) {
             u.printStackTrace();
         }
-
         try {
             serverRead(dis);
 
             while (true) {
-                System.out.println("Enter command number (1-5): ");
+                System.out.println("Enter command number (1-2): ");
                 String command = scanner.nextLine();
 
                 dos.writeUTF(command);
 
                 switch (command) {
                     case "1" -> {
-
                         serverRead(dis);
 
-                        dos.writeUTF("test file names");
+                        dos.writeUTF("Hello I");
 
                         serverRead(dis);
                     }
-                    case "2" ->
-                        serverRead(dis);
-                    case "3" -> {
-                        serverRead(dis);
-                        serverRead(dis);
-                    }
-                    case "4" -> {
+                    case "2" -> {
                         serverRead(dis);
                         serverRead(dis);
 
