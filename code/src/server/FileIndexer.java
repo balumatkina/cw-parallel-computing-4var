@@ -3,13 +3,14 @@ package code.src.server;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.Callable;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class FileIndexer implements Runnable {
+public class FileIndexer implements Callable<Void> {
 
     private Map<String, Set<String>> index;
     private ArrayList<File> files;
@@ -20,7 +21,7 @@ public class FileIndexer implements Runnable {
     }
 
     @Override
-    public void run() {
+    public Void call() {
         for (File file : files) {
             try (BufferedReader br = new BufferedReader(new FileReader(file))) {
                 String line;
@@ -40,7 +41,6 @@ public class FileIndexer implements Runnable {
                 e.printStackTrace();
             }
         }
-
+        return null;
     }
-
 }
