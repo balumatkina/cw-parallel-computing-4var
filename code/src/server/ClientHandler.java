@@ -5,7 +5,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 
 public class ClientHandler implements Runnable {
@@ -13,9 +12,11 @@ public class ClientHandler implements Runnable {
     private ExecutorService executor;
     private DataOutputStream dos;
     private DataInputStream dis;
+    private Map<String, Set<String>> index;
 
-    public ClientHandler(Socket clSocket) throws IOException {
+    public ClientHandler(Socket clSocket, Map<String, Set<String>> index) throws IOException {
         this.clSocket = clSocket;
+        this.index = index;
         dis = new DataInputStream(clSocket.getInputStream());
         dos = new DataOutputStream(clSocket.getOutputStream());
     }
@@ -23,17 +24,14 @@ public class ClientHandler implements Runnable {
     @Override
     public void run() {
         try {
-            CompletableFuture<String> future = new CompletableFuture<>();
             boolean isConnected = true;
             String clientCommand;
-            ArrayList<String> array = new ArrayList<>();
+            ArrayList<String> words = new ArrayList<>();
 
             String serverCommands = """
                     Server options:
-                    1. Sending a data to the server;
-                    2. Starting processing;
-                    3. Getting results;
-                    4. Disconnecting from the server.
+                    1. Sending a data (words separated by space) to the server;
+                    2. Disconnecting from the server.
                     """;
             dos.writeUTF(serverCommands);
 
@@ -41,32 +39,23 @@ public class ClientHandler implements Runnable {
                 clientCommand = dis.readUTF();
                 switch (clientCommand) {
                     case "1" -> {
-                        array.clear();
-                        serverResponse(dos, "Option 1. Getting data.");
+                        words.clear();
+                        serverResponse(dos, "Option 1. Send data (words separated by space).");
 
-                        array.add(dis.readUTF());
-
-                        serverResponse(dos, "Data successfully received.\n");
+                        for (String word : dis.readUTF().split(" ")) {
+                            words.add(word);
+                        }
+                        String result = "";
+                        for (String fileName : getResult(words)) {
+                            result += fileName + "\n";
+                        }
+                        if (result.isEmpty()) {
+                            result = "files not found";
+                        }
+                        serverResponse(dos, "Data successfully received. Result:\n" + result);
                     }
                     case "2" -> {
-                        serverResponse(dos, "Option 2. Starting processing.\n");
-
-                        // Future starting
-                        future = CompletableFuture.supplyAsync(() -> "Test data processed: " + array.getFirst());
-                    }
-                    case "3" -> {
-                        serverResponse(dos, "Option 3. Getting results.");
-
-                        if (future != null && future.isDone()) {
-                            String result = future.getNow(null);
-                            serverResponse(dos, "Result: " + result);
-                            future = null;
-                        } else {
-                            serverResponse(dos, "At the moment results are not ready.\n");
-                        }
-                    }
-                    case "4" -> {
-                        serverResponse(dos, "Option 4. Breaking connection.");
+                        serverResponse(dos, "Option 2. Breaking connection.");
 
                         isConnected = false;
                         if (executor != null) {
@@ -97,6 +86,25 @@ public class ClientHandler implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private Set<String> getResult(ArrayList<String> words) {
+        Set<String> result = index.get(words.get(0));
+        if (result == null) {
+            return Collections.emptySet();
+        }
+        words.remove(0);
+        Set<String> temp;
+        for (String word : words) {
+            temp = index.get(word);
+            if (temp != null) {
+                result.retainAll(temp);
+            } else {
+                result.clear();
+                break;
+            }
+        }
+        return result;
     }
 
     private static void serverResponse(DataOutputStream dos, String message) throws IOException {
