@@ -25,7 +25,7 @@ public class FileIndexer implements Runnable {
             try (BufferedReader br = new BufferedReader(new FileReader(file))) {
                 String line;
                 while ((line = br.readLine()) != null) {
-                    String[] words = line.split("\\s*[^a-zA-Z]+\\s*");
+                    String[] words = line.split("\\W");
 
                     for (String word : words) {
                         if (!word.isEmpty()) {
