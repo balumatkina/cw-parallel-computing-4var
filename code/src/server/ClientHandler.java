@@ -41,8 +41,9 @@ public class ClientHandler implements Runnable {
                     case "1" -> {
                         words.clear();
                         serverResponse(dos, "Option 1. Send data (words separated by space).");
-
-                        for (String word : dis.readUTF().split(" ")) {
+                        String clientResponse = dis.readUTF();
+                        System.out.println(clientResponse);
+                        for (String word : clientResponse.split("\\W")) {
                             words.add(word);
                         }
                         String result = "";

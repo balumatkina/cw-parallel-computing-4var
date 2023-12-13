@@ -41,12 +41,6 @@ public class IndexingHandler {
                 tasks.add(new FileIndexer(index, new ArrayList<File>(files.subList(i * step, (i + 1) * step))));
             }
         }
-        try {
-            Thread.sleep(5000);
-            System.out.println("Awakened");
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         for (FileIndexer task : tasks) {
             completionService.submit(task);
         }

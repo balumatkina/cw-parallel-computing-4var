@@ -33,7 +33,7 @@ public class Client {
                     case "1" -> {
                         serverRead(dis);
 
-                        dos.writeUTF("Hello I");
+                        dos.writeUTF("Hello");
 
                         serverRead(dis);
                     }

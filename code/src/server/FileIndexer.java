@@ -2,13 +2,13 @@ package code.src.server;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class FileIndexer implements Callable<Void> {
 
@@ -31,7 +31,7 @@ public class FileIndexer implements Callable<Void> {
                     for (String word : words) {
                         if (!word.isEmpty()) {
                             if (!index.containsKey(word)) {
-                                index.put(word, new TreeSet<>());
+                                index.put(word, new HashSet<>());
                             }
                             index.get(word).add(file.getName());
                         }
