@@ -24,7 +24,7 @@ public class Index {
 
     public void resize() {
         List<List<IndexEntry>> newArray = new ArrayList<>(currentSize * 2);
-        for (int i = 0; i < newArray.size(); i++) {
+        for (int i = 0; i < currentSize * 2; i++) {
             newArray.add(i, null);
         }
         for (List<IndexEntry> list : array) {
