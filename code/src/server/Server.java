@@ -10,10 +10,10 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Server {
     private Map<String, Set<String>> index;
 
-    public Server(int portNumb) {
+    public Server(int portNumb, int indexingThreads) {
         index = new ConcurrentHashMap<>();
         try {
-            (new Thread(new IndexingHandler(index, FileHandler.getFiles("texts")))).start();
+            (new Thread(new IndexingHandler(index, FileHandler.getFiles("texts"), indexingThreads))).start();
 
             ServerSocket serverSocket = new ServerSocket(portNumb);
             System.out.println("Server started: " + serverSocket);
