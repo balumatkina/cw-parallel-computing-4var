@@ -21,49 +21,37 @@ public class Client {
             u.printStackTrace();
         }
         try {
-            serverRead(dis);
-
+            String serverResponse;
             while (true) {
-                System.out.println("Enter command number (1-2): ");
-                String command = scanner.nextLine();
-
-                dos.writeUTF(command);
-
-                switch (command) {
-                    case "1" -> {
-                        serverRead(dis);
-
-                        dos.writeUTF("Hello");
-
-                        serverRead(dis);
-                    }
-                    case "2" -> {
-                        serverRead(dis);
-                        serverRead(dis);
-
-                        try {
-                            if (dis != null) {
-                                dis.close();
-                            }
-                            if (dos != null) {
-                                dos.close();
-                            }
-                            if (socket != null) {
-                                socket.close();
-                            }
-                            if (scanner != null) {
-                                scanner.close();
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-
-                        return;
-                    }
-                    default -> System.out.println("Invalid operation number. Please try again.");
+                serverResponse = dis.readUTF();
+                System.out.println("SERVER: " + serverResponse);
+                if (serverResponse.equals("Connection stopped.")) {
+                    shutdown(scanner);
+                    return;
                 }
+                System.out.print("CLIENT: ");
+                String clientResponse = scanner.nextLine();
+                dos.writeUTF(clientResponse);
             }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
+    private void shutdown(Scanner scanner) {
+        try {
+            if (dis != null) {
+                dis.close();
+            }
+            if (dos != null) {
+                dos.close();
+            }
+            if (socket != null) {
+                socket.close();
+            }
+            if (scanner != null) {
+                scanner.close();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -76,10 +64,4 @@ public class Client {
             e.printStackTrace();
         }
     }
-
-    private static void serverRead(DataInputStream dis) throws IOException {
-        String serverResponse = dis.readUTF();
-        System.out.println("SERVER: " + serverResponse);
-    }
-
 }
