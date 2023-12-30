@@ -3,8 +3,6 @@ package code.src.server;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
@@ -16,18 +14,18 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class IndexingHandler implements Runnable {
-    private Map<String, Set<String>> index;
+    private Index index;
     private ArrayList<File> files;
     private int threadsAmount = 4;
     private AtomicBoolean indexed;
 
-    IndexingHandler(Map<String, Set<String>> index, ArrayList<File> files, AtomicBoolean indexed) {
+    IndexingHandler(Index index, ArrayList<File> files, AtomicBoolean indexed) {
         this.index = index;
         this.files = files;
         this.indexed = indexed;
     }
 
-    IndexingHandler(Map<String, Set<String>> index, ArrayList<File> files, int threadsAmount, AtomicBoolean indexed) {
+    IndexingHandler(Index index, ArrayList<File> files, int threadsAmount, AtomicBoolean indexed) {
         this.index = index;
         this.files = files;
         this.threadsAmount = threadsAmount;

@@ -4,7 +4,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -13,10 +12,10 @@ public class ClientHandler implements Runnable {
     private ExecutorService executor;
     private DataOutputStream dos;
     private DataInputStream dis;
-    private Map<String, Set<String>> index;
+    private Index index;
     private AtomicBoolean indexed;
 
-    public ClientHandler(Socket clSocket, Map<String, Set<String>> index, AtomicBoolean indexed) throws IOException {
+    public ClientHandler(Socket clSocket, Index index, AtomicBoolean indexed) throws IOException {
         this.clSocket = clSocket;
         this.index = index;
         dis = new DataInputStream(clSocket.getInputStream());
@@ -31,7 +30,7 @@ public class ClientHandler implements Runnable {
             String clientCommand;
             String serverCommands = """
                     Server options:
-                    1. Sending a data (words separated by space) to the server;
+                    1. Sending a data (single word) to the server;
                     2. Disconnecting from the server.
                     """;
             dos.writeUTF(serverCommands);
@@ -42,17 +41,17 @@ public class ClientHandler implements Runnable {
                         if (indexed.get() == false) {
                             dos.writeUTF("Files are still indexing...");
                         } else {
-                            dos.writeUTF("Option 1. Send data (words separated by space).");
+                            dos.writeUTF("Option 1. Send data.");
                             String clientResponse = dis.readUTF();
-                            Set<String> result = index.get(clientResponse.split("\\W")[0]);
+                            String result = index.getString(clientResponse.split("\\W")[0]);
                             if (result.isEmpty()) {
                                 dos.writeUTF("no file has such word");
                             }
-                            dos.writeUTF("Result:\n" + result.toString());
+                            dos.writeUTF("Result:\n" + result);
                         }
                     }
                     case "2" -> {
-                        dos.writeUTF("Connection stopped.\n");
+                        dos.writeUTF("Connection stopped.");
                         isConnected = false;
                         if (executor != null) {
                             executor.shutdown();
