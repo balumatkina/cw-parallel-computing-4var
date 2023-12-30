@@ -13,7 +13,7 @@ public class Server {
     public Server(int portNumb) {
         index = new ConcurrentHashMap<>();
         try {
-            (new Thread(() -> new IndexingHandler(index, FileHandler.getFiles("texts")).start())).start();
+            (new Thread(new IndexingHandler(index, FileHandler.getFiles("texts")))).start();
 
             ServerSocket serverSocket = new ServerSocket(portNumb);
             System.out.println("Server started: " + serverSocket);
