@@ -26,49 +26,34 @@ public class ClientHandler implements Runnable {
         try {
             boolean isConnected = true;
             String clientCommand;
-            ArrayList<String> words = new ArrayList<>();
-
             String serverCommands = """
                     Server options:
                     1. Sending a data (words separated by space) to the server;
                     2. Disconnecting from the server.
                     """;
             dos.writeUTF(serverCommands);
-
             while (isConnected) {
                 clientCommand = dis.readUTF();
                 switch (clientCommand) {
                     case "1" -> {
-                        words.clear();
-                        serverResponse(dos, "Option 1. Send data (words separated by space).");
+                        dos.writeUTF("Option 1. Send data (words separated by space).");
                         String clientResponse = dis.readUTF();
-                        System.out.println(clientResponse);
-                        for (String word : clientResponse.split("\\W")) {
-                            words.add(word);
-                        }
-                        String result = "";
-                        for (String fileName : getResult(words)) {
-                            result += fileName + "\n";
-                        }
+                        Set<String> result = index.get(clientResponse.split("\\W")[0]);
                         if (result.isEmpty()) {
-                            result = "files not found";
+                            dos.writeUTF("no file has such word");
                         }
-                        serverResponse(dos, "Data successfully received. Result:\n" + result);
+                        dos.writeUTF("Result:\n" + result.toString());
                     }
                     case "2" -> {
-                        serverResponse(dos, "Option 2. Breaking connection.");
-
+                        dos.writeUTF("Connection stopped.\n");
                         isConnected = false;
                         if (executor != null) {
                             executor.shutdown();
                         }
-
-                        serverResponse(dos, "Connection stopped.\n");
                     }
-                    default -> System.err.println("Unknown operation.");
+                    default -> dos.writeUTF("Unknown operation.");
                 }
             }
-
             try {
                 if (dis != null) {
                     dis.close();
@@ -87,29 +72,5 @@ public class ClientHandler implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    private Set<String> getResult(ArrayList<String> words) {
-        Set<String> result = index.get(words.get(0));
-        if (result == null) {
-            return Collections.emptySet();
-        }
-        words.remove(0);
-        Set<String> temp;
-        for (String word : words) {
-            temp = index.get(word);
-            if (temp != null) {
-                result.retainAll(temp);
-            } else {
-                result.clear();
-                break;
-            }
-        }
-        return result;
-    }
-
-    private static void serverResponse(DataOutputStream dos, String message) throws IOException {
-        dos.writeUTF(message);
-        System.out.println(message);
     }
 }
