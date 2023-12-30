@@ -38,6 +38,9 @@ public class IndexingHandler implements Runnable {
         ArrayList<FileIndexer> tasks = new ArrayList<>();
         CompletionService<Void> completionService = new ExecutorCompletionService<>(executor);
         int step = threadsAmount > 0 ? files.size() / threadsAmount : files.size();
+        double time;
+        long start, end;
+        start = System.nanoTime();
         if (step < 1) {
             for (File file : files) {
                 tasks.add(new FileIndexer(index, new ArrayList<File>(List.of(file))));
@@ -65,7 +68,10 @@ public class IndexingHandler implements Runnable {
                 e.printStackTrace();
             }
         }
+        end = System.nanoTime();
+        time = (end - start) / 1e6;
         executor.shutdown();
         indexed.set(true);
+        System.out.println("Indexing time: " + time + " ms");
     }
 }
