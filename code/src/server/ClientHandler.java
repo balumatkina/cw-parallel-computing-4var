@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ClientHandler implements Runnable {
     private Socket clSocket;
@@ -13,12 +14,14 @@ public class ClientHandler implements Runnable {
     private DataOutputStream dos;
     private DataInputStream dis;
     private Map<String, Set<String>> index;
+    private AtomicBoolean indexed;
 
-    public ClientHandler(Socket clSocket, Map<String, Set<String>> index) throws IOException {
+    public ClientHandler(Socket clSocket, Map<String, Set<String>> index, AtomicBoolean indexed) throws IOException {
         this.clSocket = clSocket;
         this.index = index;
         dis = new DataInputStream(clSocket.getInputStream());
         dos = new DataOutputStream(clSocket.getOutputStream());
+        this.indexed = indexed;
     }
 
     @Override
@@ -36,13 +39,17 @@ public class ClientHandler implements Runnable {
                 clientCommand = dis.readUTF();
                 switch (clientCommand) {
                     case "1" -> {
-                        dos.writeUTF("Option 1. Send data (words separated by space).");
-                        String clientResponse = dis.readUTF();
-                        Set<String> result = index.get(clientResponse.split("\\W")[0]);
-                        if (result.isEmpty()) {
-                            dos.writeUTF("no file has such word");
+                        if (indexed.get() == false) {
+                            dos.writeUTF("Files are still indexing...");
+                        } else {
+                            dos.writeUTF("Option 1. Send data (words separated by space).");
+                            String clientResponse = dis.readUTF();
+                            Set<String> result = index.get(clientResponse.split("\\W")[0]);
+                            if (result.isEmpty()) {
+                                dos.writeUTF("no file has such word");
+                            }
+                            dos.writeUTF("Result:\n" + result.toString());
                         }
-                        dos.writeUTF("Result:\n" + result.toString());
                     }
                     case "2" -> {
                         dos.writeUTF("Connection stopped.\n");

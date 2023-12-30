@@ -13,21 +13,25 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class IndexingHandler implements Runnable {
     private Map<String, Set<String>> index;
     private ArrayList<File> files;
     private int threadsAmount = 4;
+    private AtomicBoolean indexed;
 
-    IndexingHandler(Map<String, Set<String>> index, ArrayList<File> files) {
+    IndexingHandler(Map<String, Set<String>> index, ArrayList<File> files, AtomicBoolean indexed) {
         this.index = index;
         this.files = files;
+        this.indexed = indexed;
     }
 
-    IndexingHandler(Map<String, Set<String>> index, ArrayList<File> files, int threadsAmount) {
+    IndexingHandler(Map<String, Set<String>> index, ArrayList<File> files, int threadsAmount, AtomicBoolean indexed) {
         this.index = index;
         this.files = files;
         this.threadsAmount = threadsAmount;
+        this.indexed = indexed;
     }
 
     @Override
@@ -64,5 +68,6 @@ public class IndexingHandler implements Runnable {
             }
         }
         executor.shutdown();
+        indexed.set(true);
     }
 }

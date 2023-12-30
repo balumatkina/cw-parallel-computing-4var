@@ -6,14 +6,17 @@ import java.net.Socket;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Server {
     private Map<String, Set<String>> index;
+    private AtomicBoolean indexed;
 
     public Server(int portNumb, int indexingThreads) {
         index = new ConcurrentHashMap<>();
+        indexed = new AtomicBoolean(false);
         try {
-            (new Thread(new IndexingHandler(index, FileHandler.getFiles("texts"), indexingThreads))).start();
+            (new Thread(new IndexingHandler(index, FileHandler.getFiles("texts"), indexingThreads, indexed))).start();
 
             ServerSocket serverSocket = new ServerSocket(portNumb);
             System.out.println("Server started: " + serverSocket);
@@ -24,7 +27,7 @@ public class Server {
                 try {
                     clientSocket = serverSocket.accept();
                     System.out.println("Client connected: " + clientSocket + "\n");
-                    ClientHandler clientHandler = new ClientHandler(clientSocket, index);
+                    ClientHandler clientHandler = new ClientHandler(clientSocket, index, indexed);
                     Thread thread = new Thread(clientHandler);
                     thread.start();
                 } catch (Exception e) {
