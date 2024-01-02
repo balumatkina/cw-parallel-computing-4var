@@ -43,7 +43,14 @@ public class ClientHandler implements Runnable {
                         } else {
                             dos.writeUTF("Option 1. Send data.");
                             String clientResponse = dis.readUTF();
+                            double time;
+                            long start, end;
+                            start = System.nanoTime();
                             String result = index.getString(clientResponse.split("\\W")[0]);
+                            end = System.nanoTime();
+                            time = (end - start) / 1e6;
+                            System.out.println("Search time: " + time + " ms");
+
                             if (result.isEmpty()) {
                                 dos.writeUTF("no file has such word");
                             }
