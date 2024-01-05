@@ -4,12 +4,10 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ClientHandler implements Runnable {
     private Socket clSocket;
-    private ExecutorService executor;
     private DataOutputStream dos;
     private DataInputStream dis;
     private Index index;
@@ -60,9 +58,6 @@ public class ClientHandler implements Runnable {
                     case "2" -> {
                         dos.writeUTF("Connection stopped.");
                         isConnected = false;
-                        if (executor != null) {
-                            executor.shutdown();
-                        }
                     }
                     default -> dos.writeUTF("Unknown operation.");
                 }
