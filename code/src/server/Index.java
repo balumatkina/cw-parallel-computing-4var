@@ -84,21 +84,12 @@ public class Index {
     }
 
     public String getString(String key) {
-        lock.readLock().lock();
-        int index = Math.abs(key.hashCode()) % array.size();
-        if (array.get(index) == null) {
-            lock.readLock().unlock();
-            return null;
-        }
-        for (IndexEntry entry : array.get(index)) {
-            if (entry.getKey().equals(key)) {
-                lock.readLock().unlock();
-                return entry.getValueString();
-            }
-        }
-        lock.readLock().unlock();
+        Set<String>value = this.get(key);
+        if (value != null)
+            return value.toString();
         return null;
     }
+
 
     private class IndexEntry {
         private final String key;
@@ -115,10 +106,6 @@ public class Index {
 
         public Set<String> getValue() {
             return value;
-        }
-
-        public String getValueString() {
-            return value.toString();
         }
 
         public void addValue(String value) {
